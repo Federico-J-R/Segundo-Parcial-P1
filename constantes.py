@@ -38,13 +38,7 @@ POS_PUNTUACION = (575,25)
 PUNTUACION_ACIERTO = 100
 PUNTUACION_ERROR = 50
 
-#COMODINES
-DICT_COMODINES_INICIAL ={
-    "bombas":1,
-    "x2":1,
-    "doble_chance":1,
-    "pasar":1
-}
+
 
 POS_BOMBAS = (25,515)
 POS_X2 = (225,515)
@@ -58,6 +52,7 @@ POS_Y_RESP = 265
 MARGEN_RESP = 80
 
 POS_INPUT = (275 , 265)
+POS_ACEPTAR = (325 , 400)
 
 # CONSTANATES (y no tan constantes...) DEL MENU DE INICIO
 
@@ -73,3 +68,31 @@ POS_X_BOTON_MENU= ANCHO // 2 - TAMAÑO_BOTON[0] // 2
 POS_Y_BOTON_MENU = ALTO // len(LISTA_OPCIONES_MENU) - TAMAÑO_BOTON[1]
 POS_INICIO_MENU = (POS_X_BOTON_MENU , POS_Y_BOTON_MENU)
 
+#VIDAS
+
+#COMODINES
+DICT_COMODINES_INICIAL ={
+    "bombas":1,
+    "x2":1,
+    "doble_chance":1,
+    "pasar":1
+}
+
+DICT_FLAG_COMODINES ={
+    "x2":False,
+    "doble_chance":False,
+}
+
+DATOS_JUEGO_INICIAL = {
+        "vidas": CANTIDAD_VIDAS,
+        "tiempo": (TIEMPO_PREGUNTA,None,True),
+        "puntaje": 0,
+        "comodines": DICT_COMODINES_INICIAL,
+        "i_pregunta" : 0,
+        "aciertos" : 0,
+        "continua juego" : True,
+        "pregunta": None,
+        "pantalla" : "Menu",
+        "jugador": "Ingrese su nombre",
+        "flag_comodines" : DICT_FLAG_COMODINES
+    }

@@ -23,9 +23,21 @@ def procesar_eventos_juego(evento, opciones, datos_juego) -> dict[str:pg.Rect]:
             restar_acierto(datos_juego)
             reiniciar_tiempo(datos_juego)
             print("FRACASO")
+        
+        elif opcion_seleccionada == "bomba":
+            pass
+        
+        elif opcion_seleccionada == "x2":
+            usar_com_x2(datos_juego)
+
+        elif opcion_seleccionada == "pasar":
+            usar_com_pasar(datos_juego)
+
+        elif opcion_seleccionada == "doble":
+            pass
 
         else:
-            retorno = False
+            opcion_seleccionada = False
 
         print(opcion_seleccionada)
 
@@ -69,7 +81,11 @@ def sumar_acierto(datos_juego):
     una vida.
     Pasa a la siguiente pregunta
     '''
-    datos_juego["puntaje"] += PUNTUACION_ACIERTO
+    puntos_acierto = PUNTUACION_ACIERTO
+    if datos_juego["flag_comodines"]["x2"] == True:
+        puntos_acierto *= 2
+        datos_juego["flag_comodines"]["x2"] = False
+    datos_juego["puntaje"] += puntos_acierto
     datos_juego["aciertos"] += 1
     datos_juego["i_pregunta"] += 1
     datos_juego["tiempo"] = (TIEMPO_PREGUNTA,True)
@@ -84,11 +100,29 @@ def restar_acierto(datos_juego):
     Tambien resta una vida.
     Pasa a la siguiente pregunta
     '''
+    if datos_juego["flag_comodines"]["x2"] == True:
+        datos_juego["flag_comodines"]["x2"] = False
     datos_juego["puntaje"] -= PUNTUACION_ERROR
     datos_juego["aciertos"] = 0
     datos_juego["vidas"] -= 1
     datos_juego["i_pregunta"] += 1
     datos_juego["tiempo"] = (TIEMPO_PREGUNTA,True)
+
+# MANEJO DE COMODINES
+
+def usar_com_x2(datos_juego):
+
+    cantidad_com = datos_juego.get("comodines").get("x2")
+    if cantidad_com > 0:
+        datos_juego["comodines"]["x2"] = cantidad_com -1
+        datos_juego["flag_comodines"]["x2"] = True
+
+def usar_com_pasar(datos_juego):
+
+    cantidad_com = datos_juego.get("comodines").get("pasar")
+    if cantidad_com > 0:
+        datos_juego["comodines"]["pasar"] = cantidad_com -1
+        datos_juego["i_pregunta"] += 1
 
 # DETERMINACION DE PREGUNTAS
 
@@ -133,10 +167,11 @@ def mostrar_juego(pantalla:pg.surface, datos_juego:dict) -> dict[str:pg.Rect]:
 
     dibujar_fondo_pantalla(pantalla)
     dibujar_hud(pantalla, vidas, tiempo, puntaje) 
-    dibujar_comodines(pantalla, comodines)
+    opciones_comodines = dibujar_comodines(pantalla, comodines)
     opciones_trivia = dibujar_trivia(pantalla, pregunta)
+    opciones = opciones_comodines | opciones_trivia
 
-    return opciones_trivia
+    return opciones
 
 # DIBUJO HUD
 def dibujar_hud(pantalla:pg.surface, vidas:int, tiempo:int, puntaje:int)-> None:
@@ -168,38 +203,52 @@ def dibujar_comodines(pantalla:pg.surface, dict_comodines:dict[str:int]) -> None
     '''
     Muestra en pantalla los comodines disponibles
     '''
-    dibujar_bombas(pantalla, dict_comodines.get("bombas"))
-    dibujar_X2(pantalla, dict_comodines.get("x2"))
-    dibujar_doble_chance(pantalla, dict_comodines.get("doble_chance"))
-    dibujar_pasar(pantalla, dict_comodines.get("pasar"))
+    dict_bombas = dibujar_bombas(pantalla, dict_comodines.get("bombas"))
+    dict_x2 = dibujar_X2(pantalla, dict_comodines.get("x2"))
+    dict_doble = dibujar_doble_chance(pantalla, dict_comodines.get("doble_chance"))
+    dict_pasar = dibujar_pasar(pantalla, dict_comodines.get("pasar"))
+
+    opciones_comodines = dict_bombas | dict_x2 | dict_doble | dict_pasar
+
+    return opciones_comodines
 
 def dibujar_bombas(pantalla:pg.surface, cant_bomba:int) -> None:
     '''
     Muestra en pantalla la cantidad de comodines bomba disponibles.
     '''
     texto = f"Bombas: {cant_bomba}"
-    mostrar_texto(pantalla, texto, TAMAÑO_BOTON_CHICO,POS_BOMBAS,tamaño= 25)
+    dict_bomba = {}
+    dict_bomba["bomba"] = mostrar_texto(pantalla, texto, TAMAÑO_BOTON_CHICO,POS_BOMBAS,tamaño= 25)
+    return dict_bomba
 
 def dibujar_X2(pantalla:pg.surface, cant_X2:int):
     '''
     Muestra en pantalla la cantidad de comodines x2 disponibles.
     '''
     texto = f"X2: {cant_X2}"
-    mostrar_texto(pantalla, texto, TAMAÑO_BOTON_CHICO, POS_X2, tamaño= 25)
+    dict_x2 ={}
+    dict_x2["x2"] = mostrar_texto(pantalla, texto, TAMAÑO_BOTON_CHICO, POS_X2, tamaño= 25)
+    return dict_x2
 
 def dibujar_doble_chance(pantalla:pg.surface, cant_doble_chance:int) -> None:
     '''
     Muestra en pantalla la cantidad de comodines x2 disponibles.
     '''
     texto = f"Doble Chance: {cant_doble_chance}"
-    mostrar_texto(pantalla, texto, TAMAÑO_BOTON_CHICO, POS_DOBLE_CHANCE, tamaño= 25)
+    dict_doble = {}
+    dict_doble["doble"] = mostrar_texto(pantalla, texto, TAMAÑO_BOTON_CHICO, POS_DOBLE_CHANCE, tamaño= 25)
+
+    return dict_doble
 
 def dibujar_pasar(pantalla:pg.surface, cant_pasar:int) -> None:
     '''
     Muestra en pantalla la cantidad de comodines x2 disponibles.
     '''
     texto = f"Pasar: {cant_pasar}"
-    mostrar_texto(pantalla, texto, TAMAÑO_BOTON_CHICO, POS_PASAR, tamaño= 25)
+    dict_pasar = {}
+    dict_pasar["pasar"] = mostrar_texto(pantalla, texto, TAMAÑO_BOTON_CHICO, POS_PASAR, tamaño= 25)
+
+    return dict_pasar
 
 # DIBUJO PREGUNTA
 

@@ -37,7 +37,7 @@ def cerrar_programa() -> None:
 
 #EVENTOS DEL MENU
 
-def procesar_eventos_menu(evento:pg.event.Event ,opciones:dict[str,pg.Rect]) -> str:
+def procesar_eventos_menu(evento:pg.event.Event ,opciones:dict[str,pg.Rect], datos_juego:dict) -> str:
     '''
     Realiza las acciones correspondientes segun la opcion seleccionada
     en el menu de inicio.
@@ -49,8 +49,8 @@ def procesar_eventos_menu(evento:pg.event.Event ,opciones:dict[str,pg.Rect]) -> 
         if opcion_seleccionada == "Salir":
             cerrar_programa()
         elif opcion_seleccionada == False:
-            retorno = "Menu"
+            pantalla = "Menu"
         else:
-            retorno = opcion_seleccionada
+            pantalla = opcion_seleccionada
 
-        return retorno
+        cambiar_pantalla(pantalla,datos_juego)

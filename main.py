@@ -24,49 +24,39 @@ pantalla = pg.display.set_mode(VENTANA)
 lista_preguntas = obtener_lista_csv(r"Segundo parcial\data\preguntas.csv")
 randomizar_preguntas(lista_preguntas)
 
-datos_juego = {
-        "vidas": CANTIDAD_VIDAS,
-        "tiempo": (TIEMPO_PREGUNTA,None,True),
-        "puntaje": 0,
-        "comodines": DICT_COMODINES_INICIAL,
-        "i_pregunta" : 0,
-        "pregunta" : lista_preguntas[0],
-        "aciertos" : 0,
-        "continua juego" : True,
-        "jugador": ""
-    }
-pantalla_actual = "Menu"
-estado_juego = determinar_game_over(datos_juego, lista_preguntas)
-
+datos_juego = DATOS_JUEGO_INICIAL.copy()
 
 while True:
     cola_eventos = pg.event.get()
+    pantalla_actual = datos_juego.get("pantalla")
 
     #EVENTOS
     for evento in cola_eventos:
+        
         if evento.type == pg.QUIT:
             cerrar_programa()
 
-        elif evento.type == pg.MOUSEBUTTONUP:
+        elif evento.type == pg.MOUSEBUTTONUP or evento.type == pg.KEYDOWN:
             if pantalla_actual == "Menu":
-                pantalla_actual = procesar_eventos_menu(evento,opciones)
+                procesar_eventos_menu(evento,opciones,datos_juego)
     
             elif pantalla_actual == "Jugar":
                 procesar_eventos_juego(evento, opciones, datos_juego)
 
             elif pantalla_actual == "Game Over":
                 procesar_eventos_game_over(evento, opciones, datos_juego)
+                
             
             elif pantalla_actual == "Top Partidas":
-                pantalla_actual = "Menu"
+                pass
             
             elif pantalla_actual == "Configuracion":
-                pantalla_actual = "Menu"
+                pass
 
             elif pantalla_actual == "Añadir preguntas":
-                pantalla_actual = "Menu"
+                pass
 
-            time.sleep(0.1)
+            time.sleep(0.05)
             pg.event.clear()
     
 
@@ -79,26 +69,29 @@ while True:
         opciones = mostrar_menu_principal(pantalla)
     
     elif pantalla_actual == "Jugar":
+
         estado_juego = determinar_game_over(datos_juego, lista_preguntas)
+
         if estado_juego == True:
-            procesar_eventos_tiempo(datos_juego)
             determinar_pregunta_actual(lista_preguntas,datos_juego)
+            procesar_eventos_tiempo(datos_juego)
             opciones = mostrar_juego(pantalla, datos_juego)
+
         else:
-            pantalla_actual = "Game Over"
+            randomizar_preguntas(lista_preguntas)
+            cambiar_pantalla("Game Over",datos_juego)
 
     elif pantalla_actual == "Game Over":
-        mostrar_game_over(pantalla,datos_juego)
-        
+        opciones = mostrar_game_over(pantalla,datos_juego)
 
     elif pantalla_actual == "Top Partidas":
-        pantalla_actual = "Menu"
+        cambiar_pantalla("Menu",datos_juego)
     
     elif pantalla_actual == "Configuracion":
-        pantalla_actual = "Menu"
+        cambiar_pantalla("Menu",datos_juego)
 
     elif pantalla_actual == "Añadir preguntas":
-        pantalla_actual = "Menu"
+        cambiar_pantalla("Menu",datos_juego)
     #sonido_menu.play()
 
 

@@ -2,6 +2,7 @@ from constantes import *
 import random
 import pygame as pg
 import pygame.mixer as mixer
+import json as js
 
 def mostrar_texto_original(pantalla:pg.Surface, texto: str,tamaño_caja:tuple, posicion: tuple, color:tuple = COLOR_NEGRO, tamaño:int=36) -> pg.Rect:
     '''
@@ -95,13 +96,12 @@ def verificar_opcion_seleccionada(evento:pg.event.Event ,opciones:dict[str,pg.Re
     retornara False
     '''
     opcion_seleccionada = False
-    if evento.button == 1:
+    if evento.type ==pg.MOUSEBUTTONUP and evento.button == 1:
         mouse_pos = evento.pos
         for k_opcion, v_opcion in opciones.items():
             if v_opcion.collidepoint(mouse_pos):
                 opcion_seleccionada = k_opcion
                 break
-
     return opcion_seleccionada
 
 def cerrar_programa() -> None:
@@ -117,6 +117,39 @@ def obtener_dato_tiempo(datos_juego:dict, i_dato:int) -> bool:
     Obtiene la flag, dentro de la tupla tiempo
     '''
     return datos_juego.get("tiempo")[i_dato]
+
+def cambiar_pantalla(pantalla:str,datos_juego:dict) -> None:
+    '''
+    Cambia el dato de la pantalla de juego, al nombre de
+    la pantalla dado
+    '''
+    datos_juego["pantalla"] = pantalla
+
+def reiniciar_datos_juego(datos_juego:dict):
+    datos_juego.update(DATOS_JUEGO_INICIAL)
+
+def guardar_jugador_js(ruta:str,datos_juego):
+    data = {}
+    data["jugador"] = datos_juego.get("jugador")
+    data["puntaje"] = datos_juego.get("puntaje")
+    
+    with open(ruta, "r") as archivo:
+        datos_json = archivo.read()
+        
+
+        if datos_json == "":
+            datos_archivo = []
+        
+        else:
+            archivo.seek(0)
+            datos_archivo = js.load(archivo)
+            if type(datos_archivo) == dict:
+                datos_archivo = datos_archivo
+
+    datos_archivo.append(data)
+
+    with open(ruta, "w") as archivo:
+        js.dump(datos_archivo, archivo, indent=4)
 
 #PREGUNTAS
 
