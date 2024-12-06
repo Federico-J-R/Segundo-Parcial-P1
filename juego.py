@@ -1,8 +1,6 @@
 from functions import *
 import time
 
-
-
 # MANEJO DE EVENTOS Y TIEMPO
 def procesar_eventos_juego(evento, opciones, datos_juego) -> dict[str:pg.Rect]:
     '''
@@ -14,27 +12,26 @@ def procesar_eventos_juego(evento, opciones, datos_juego) -> dict[str:pg.Rect]:
         respuesta_correcta = datos_juego.get("pregunta").get("respuesta_correcta")
         opcion_seleccionada =  verificar_opcion_seleccionada(evento ,opciones)
 
-        if opcion_seleccionada == respuesta_correcta and opcion_seleccionada in ["1", "2", "3"]:
+        if opcion_seleccionada == respuesta_correcta and opcion_seleccionada in ["1", "2", "3","4","5"]:
             sumar_acierto(datos_juego)
-            reiniciar_tiempo(datos_juego)
             print("ACIERTO")
 
-        elif opcion_seleccionada != respuesta_correcta and opcion_seleccionada in ["1", "2", "3"]:
+        elif opcion_seleccionada != respuesta_correcta and opcion_seleccionada in ["1", "2", "3","4","5"]:
             restar_acierto(datos_juego)
-            reiniciar_tiempo(datos_juego)
             print("FRACASO")
         
         elif opcion_seleccionada == "bomba":
-            pass
+            usar_com_bomba(datos_juego)
         
         elif opcion_seleccionada == "x2":
             usar_com_x2(datos_juego)
 
         elif opcion_seleccionada == "pasar":
             usar_com_pasar(datos_juego)
+            reiniciar_tiempo(datos_juego)
 
         elif opcion_seleccionada == "doble":
-            pass
+            usar_com_doble_chance(datos_juego)
 
         else:
             opcion_seleccionada = False
@@ -78,13 +75,17 @@ def sumar_acierto(datos_juego):
     '''
     Suma los puntos correspondientes a un acierto.
     En caso de ser el quinto acierto seguido, tambien suma
-    una vida.
+    una vida. Tiene en cuenta el uso de comodines.
     Pasa a la siguiente pregunta
     '''
     puntos_acierto = PUNTUACION_ACIERTO
     if datos_juego["flag_comodines"]["x2"] == True:
         puntos_acierto *= 2
         datos_juego["flag_comodines"]["x2"] = False
+    
+    if datos_juego["flag_comodines"]["doble_chance"] == True:
+        datos_juego["flag_comodines"]["doble_chance"] = False
+    
     datos_juego["puntaje"] += puntos_acierto
     datos_juego["aciertos"] += 1
     datos_juego["i_pregunta"] += 1
@@ -93,22 +94,73 @@ def sumar_acierto(datos_juego):
     if datos_juego.get("aciertos") == 5:
         datos_juego["vidas"] += 1
         datos_juego["aciertos"] = 0
+    reiniciar_tiempo(datos_juego)
 
 def restar_acierto(datos_juego):
     '''
     Resta los puntos correspondientes a un fracaso.
-    Tambien resta una vida.
+    Tambien resta una vida. Tiene en cuenta el uso de comodines
     Pasa a la siguiente pregunta
     '''
     if datos_juego["flag_comodines"]["x2"] == True:
         datos_juego["flag_comodines"]["x2"] = False
-    datos_juego["puntaje"] -= PUNTUACION_ERROR
-    datos_juego["aciertos"] = 0
-    datos_juego["vidas"] -= 1
-    datos_juego["i_pregunta"] += 1
-    datos_juego["tiempo"] = (TIEMPO_PREGUNTA,True)
+
+    if datos_juego["flag_comodines"]["doble_chance"] == True:
+        datos_juego["flag_comodines"]["doble_chance"] = False
+    else:
+        datos_juego["puntaje"] -= PUNTUACION_ERROR
+        datos_juego["aciertos"] = 0
+        datos_juego["vidas"] -= 1
+        datos_juego["i_pregunta"] += 1
+        datos_juego["tiempo"] = (TIEMPO_PREGUNTA,True)
+        reiniciar_tiempo(datos_juego)
 
 # MANEJO DE COMODINES
+def usar_com_doble_chance(datos_juego):
+    '''
+    Utiliza un comodin de doble chance.
+    En caso de seleccionar una opcion incorrecta, 
+    '''
+    cantidad_com = datos_juego.get("comodines").get("doble_chance")
+    if cantidad_com > 0:
+        datos_juego["comodines"]["doble_chance"] = cantidad_com -1
+        datos_juego["flag_comodines"]["doble_chance"] = True
+
+def usar_com_bomba(datos_juego):
+    '''
+    Utiliza uno de los comodines bomba. Borra el texto de las opciones
+    dejando solamente el texto de una opcion correcta y de otra opcion al azar
+    '''
+    cantidad_com = datos_juego.get("comodines").get("bombas") 
+    
+    if cantidad_com > 0:
+        datos_juego["comodines"]["bombas"] = cantidad_com -1
+        
+        pregunta = datos_juego.get("pregunta")
+        cantidad_preguntas = len(pregunta) - 2
+        opcion_correcta = pregunta.get("respuesta_correcta")
+        
+        opcion_superviviente = str(random.randint(1,cantidad_preguntas))
+        while opcion_correcta == opcion_superviviente:
+            opcion_superviviente = str(random.randint(1,cantidad_preguntas))
+
+        opcion_superviviente = f"respuesta_{opcion_superviviente}"
+        opcion_correcta = f"respuesta_{opcion_correcta}"
+        
+        claves_no_eliminar = [
+            "pregunta", 
+            "respuesta_correcta",
+            opcion_superviviente,
+            opcion_correcta
+            ]
+
+        for clave in pregunta.keys():
+            if clave not in claves_no_eliminar:
+                pregunta[clave] = ""
+                print("respuesta eliminada")
+            
+        
+        datos_juego["pregunta"] = pregunta
 
 def usar_com_x2(datos_juego):
 
@@ -126,14 +178,24 @@ def usar_com_pasar(datos_juego):
 
 # DETERMINACION DE PREGUNTAS
 
-def determinar_pregunta_actual(lista_preguntas:list[dict], datos_juego:dict) -> None:
+def determinar_pregunta(lista_preguntas:list[dict], datos_juego:dict) -> None:
     '''
     En base a los datos del juego y una lista de preguntas. Determina cual
     es la pregunta actual durante una partida. La pregunta actual
     es actualizada sobre los datos del juego.
     '''
     i_pregunta = datos_juego.get("i_pregunta")
-    datos_juego["pregunta"] = lista_preguntas[i_pregunta]
+    datos_juego["pregunta"] = copy.deepcopy(lista_preguntas[i_pregunta])
+
+def determinar_primer_pregunta(lista_preguntas:list[dict], datos_juego:dict) -> None:
+    '''
+    determina la primer pregunta de una partida, solo en caso
+    de no haber sido determinada aun.
+    '''
+    i_pregunta = datos_juego.get("i_pregunta")
+    pregunta = datos_juego.get("pregunta")
+    if i_pregunta == 0 and pregunta == None:
+        determinar_pregunta(lista_preguntas,datos_juego)
 
 # DETERMINAR GAME OVER
 
@@ -152,7 +214,6 @@ def determinar_game_over(datos_juego:dict, lista_preguntas:list[dict]) -> bool:
         retorno = False
 
     return retorno 
-
 
 # DIBUJO JUEGO
 def mostrar_juego(pantalla:pg.surface, datos_juego:dict) -> dict[str:pg.Rect]:

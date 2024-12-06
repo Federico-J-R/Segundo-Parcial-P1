@@ -3,6 +3,7 @@ import random
 import pygame as pg
 import pygame.mixer as mixer
 import json as js
+import copy
 
 def mostrar_texto_original(pantalla:pg.Surface, texto: str,tamaño_caja:tuple, posicion: tuple, color:tuple = COLOR_NEGRO, tamaño:int=36) -> pg.Rect:
     '''
@@ -24,7 +25,7 @@ def mostrar_texto_original(pantalla:pg.Surface, texto: str,tamaño_caja:tuple, p
 
     return rec_boton
 
-# Modificado por IA:
+# Mostrar texto modificado por IA:
 def mostrar_texto(pantalla: pg.Surface, texto: str, tamaño_caja: tuple, posicion: tuple, color: tuple = COLOR_NEGRO, tamaño: int = 36) -> pg.Rect:
     """
     Crea una caja de texto con líneas ajustadas al ancho de la caja.
@@ -86,7 +87,7 @@ def dibujar_fondo_pantalla(pantalla:pg.surface) -> None:
     pantalla.blit(fondo_menu,(0,0))
 
 
-#EVENTOS
+#EVENTOS (y otras cosas)
 def verificar_opcion_seleccionada(evento:pg.event.Event ,opciones:dict[str,pg.Rect]) -> str:
     '''
     Verifica segun un evento dado, en el caso del que el mismo sea
@@ -126,7 +127,7 @@ def cambiar_pantalla(pantalla:str,datos_juego:dict) -> None:
     datos_juego["pantalla"] = pantalla
 
 def reiniciar_datos_juego(datos_juego:dict):
-    datos_juego.update(DATOS_JUEGO_INICIAL)
+    datos_juego.update(copy.deepcopy(DATOS_JUEGO_INICIAL))
 
 def guardar_jugador_js(ruta:str,datos_juego):
     data = {}
@@ -151,6 +152,24 @@ def guardar_jugador_js(ruta:str,datos_juego):
     with open(ruta, "w") as archivo:
         js.dump(datos_archivo, archivo, indent=4)
 
+def terminar_partida(ruta,datos_juego):
+    '''
+    Guarda los datos del final de la partida en un json.
+    Cambia la pantalla actual a la pantalla de menu y reinicia
+    los datos del juego al estado original.
+    '''
+    guardar_jugador_js(ruta,datos_juego)
+    cambiar_pantalla("Menu",datos_juego)
+    reiniciar_datos_juego(datos_juego)
+
+def establecer_datos_juego() ->dict:
+    '''
+    Establece los datos del juego (configuracion del mismo).
+    segun los datos almacenados en las constantes.
+    Los datos del juego son retornados como diccionario
+    '''
+    return copy.deepcopy(DATOS_JUEGO_INICIAL)
+
 #PREGUNTAS
 
 def obtener_lista_csv(nombre_archivo:str) -> list[dict]:
@@ -170,7 +189,7 @@ def obtener_lista_csv(nombre_archivo:str) -> list[dict]:
             datos = linea.replace("\n", "").split(",")
             diccionario = {}
 
-            rango = len(lista_claves)            
+            rango = len(lista_claves)
             for i in range(rango):
                 clave_dict = lista_claves[i]
                 valor_dict = datos[i]

@@ -12,13 +12,14 @@ def procesar_eventos_game_over(evento, opciones, datos_juego):
         datos_juego["jugador"] = ""
 
     elif opcion_selecionada == "2":
-        guardar_jugador_js(r"Segundo parcial\data\ranking.js",datos_juego)
-        cambiar_pantalla("Menu",datos_juego)
-        reiniciar_datos_juego(datos_juego)
+        terminar_partida(r"Segundo parcial\data\ranking.json",datos_juego)
 
     if evento.type == pg.KEYDOWN and datos_juego["jugador"] != "Ingrese su nombre":
         if evento.key == pg.K_BACKSPACE:
             datos_juego["jugador"] = jugador[:-1]
+
+        elif evento.key == pg.K_KP_ENTER or evento.key == pg.K_RETURN:
+            terminar_partida(r"Segundo parcial\data\ranking.json",datos_juego)
         else:
             datos_juego["jugador"] += evento.unicode
 

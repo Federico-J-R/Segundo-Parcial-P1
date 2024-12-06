@@ -2,7 +2,7 @@ from functions import *
 from menu import *
 from juego import *
 from game_over import *
-
+from configuracion  import *
 
 #--------# INICIALIZANDO VENTANA #--------#
 pg.init()
@@ -10,7 +10,7 @@ pg.init()
 # SONIDO:
 mixer.init()
 sonido_menu = mixer.Sound(r"Segundo parcial\sonidos\menu_principal.mp3")
-sonido_menu.set_volume(0.04)
+sonido_menu.set_volume(VOLUMEN)
 
 reloj = pg.time.Clock()
 
@@ -23,8 +23,8 @@ pantalla = pg.display.set_mode(VENTANA)
 #--------# BUCLE PRINCIPAL #--------#
 lista_preguntas = obtener_lista_csv(r"Segundo parcial\data\preguntas.csv")
 randomizar_preguntas(lista_preguntas)
+datos_juego = establecer_datos_juego()
 
-datos_juego = DATOS_JUEGO_INICIAL.copy()
 
 while True:
     cola_eventos = pg.event.get()
@@ -42,6 +42,7 @@ while True:
     
             elif pantalla_actual == "Jugar":
                 procesar_eventos_juego(evento, opciones, datos_juego)
+                determinar_pregunta(lista_preguntas,datos_juego)
 
             elif pantalla_actual == "Game Over":
                 procesar_eventos_game_over(evento, opciones, datos_juego)
@@ -51,7 +52,7 @@ while True:
                 pass
             
             elif pantalla_actual == "Configuracion":
-                pass
+                procesar_eventos_conf(evento, opciones,datos_juego)
 
             elif pantalla_actual == "Añadir preguntas":
                 pass
@@ -73,9 +74,11 @@ while True:
         estado_juego = determinar_game_over(datos_juego, lista_preguntas)
 
         if estado_juego == True:
-            determinar_pregunta_actual(lista_preguntas,datos_juego)
+            determinar_primer_pregunta(lista_preguntas,datos_juego)
+            
+
             procesar_eventos_tiempo(datos_juego)
-            opciones = mostrar_juego(pantalla, datos_juego)
+            opciones = mostrar_juego(pantalla, datos_juego) 
 
         else:
             randomizar_preguntas(lista_preguntas)
@@ -88,7 +91,7 @@ while True:
         cambiar_pantalla("Menu",datos_juego)
     
     elif pantalla_actual == "Configuracion":
-        cambiar_pantalla("Menu",datos_juego)
+        opciones = mostrar_configuracion(pantalla)
 
     elif pantalla_actual == "Añadir preguntas":
         cambiar_pantalla("Menu",datos_juego)
