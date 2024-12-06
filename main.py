@@ -10,7 +10,7 @@ pg.init()
 # SONIDO:
 mixer.init()
 sonido_menu = mixer.Sound(r"Segundo parcial\sonidos\menu_principal.mp3")
-sonido_menu.set_volume(VOLUMEN)
+
 
 reloj = pg.time.Clock()
 
@@ -27,11 +27,12 @@ datos_juego = establecer_datos_juego()
 
 
 while True:
+    sonido_menu.set_volume(VOLUMEN)
     cola_eventos = pg.event.get()
     pantalla_actual = datos_juego.get("pantalla")
 
     #EVENTOS
-    for evento in cola_eventos:
+    for evento in cola_eventos: 
         
         if evento.type == pg.QUIT:
             cerrar_programa()

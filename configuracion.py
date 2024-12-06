@@ -52,15 +52,13 @@ def procesar_eventos_conf(evento, opciones,datos_juego:dict) -> dict[str:pg.Rect
             DATOS_JUEGO_INICIAL.update(
                 {
                 "vidas": CANTIDAD_VIDAS,
-                "tiempo": (TIEMPO_PREGUNTA,None,True),
+                "tiempo": (TIEMPO_PREGUNTA,None,True,TIEMPO_PREGUNTA),
                 "comodines": DICT_COMODINES_INICIAL,
                 "pantalla" : "Menu",
             }
             )
             datos_juego.update(establecer_datos_juego())
             print("Configuracion guardada!")
-            print(DATOS_JUEGO_INICIAL)
-            print(datos_juego)
 
         else:
             opcion_seleccionada = False

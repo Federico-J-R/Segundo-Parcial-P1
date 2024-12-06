@@ -35,6 +35,7 @@ TIEMPO_PREGUNTA = 10
 I_TIEMPO_RESTANTE = 0
 I_TIEMPO_INICIAL = 1
 I_FLAG_TIEMPO = 2
+I_TIEMPO_PREGUNTA = 3
 
 #PUNTUACION
 POS_PUNTUACION = (575,25)
@@ -94,7 +95,7 @@ DICT_FLAG_COMODINES ={
 
 DATOS_JUEGO_INICIAL = {
         "vidas": CANTIDAD_VIDAS,
-        "tiempo": (TIEMPO_PREGUNTA,None,True),
+        "tiempo": (TIEMPO_PREGUNTA,None,True,TIEMPO_PREGUNTA),
         "puntaje": 0,
         "comodines": DICT_COMODINES_INICIAL,
         "i_pregunta" : 0,

@@ -53,6 +53,8 @@ def determinar_tiempo_restante(datos_juego):
     El valor es almacenado en los datos del juego.
     '''
     flag_tiempo = obtener_dato_tiempo(datos_juego,I_FLAG_TIEMPO)
+    tiempo_pregunta = obtener_dato_tiempo(datos_juego,I_TIEMPO_PREGUNTA)
+
     if flag_tiempo == True:
         tiempo_inicial = time.time()
         flag_tiempo  = False
@@ -60,8 +62,8 @@ def determinar_tiempo_restante(datos_juego):
         tiempo_inicial = obtener_dato_tiempo(datos_juego,I_TIEMPO_INICIAL)
     tiempo_transcurrido = int(time.time() - tiempo_inicial)
 
-    tiempo_restante = TIEMPO_PREGUNTA - tiempo_transcurrido
-    datos_juego["tiempo"] = (tiempo_restante, tiempo_inicial, flag_tiempo)
+    tiempo_restante = datos_juego["tiempo"][I_TIEMPO_PREGUNTA] - tiempo_transcurrido
+    datos_juego["tiempo"] = (tiempo_restante, tiempo_inicial, flag_tiempo,tiempo_pregunta)
 
     return tiempo_restante
 
